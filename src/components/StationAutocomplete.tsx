@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import type { FC, MouseEvent as ReactMouseEvent, KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { STATIONS, LINE_COLORS } from '../data/subwayData';
 import type { Station } from '../data/subwayData';
-import { matchStation } from '../utils/hangul';
+import { getMatchScore } from '../utils/hangul';
 import { MapPin, Search, X } from 'lucide-react';
 
 interface StationAutocompleteProps {
@@ -15,7 +15,7 @@ interface StationAutocompleteProps {
 export const StationAutocomplete: FC<StationAutocompleteProps> = ({
   value,
   onChange,
-  placeholder = '역명을 입력하세요 (예: 강남, 홍대, ㄱㄴ)',
+  placeholder = '역명을 입력하세요 (예: 사당, 강남, ㅅㄷ)',
   autoFocus = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,10 +31,16 @@ export const StationAutocomplete: FC<StationAutocompleteProps> = ({
 
   useEffect(() => {
     if (inputVal.trim() === '') {
+      // 추천 기본 주요 역들 (사당, 강남, 홍대, 서울역, 신도림 등)
       setFilteredStations(STATIONS.slice(0, 8));
     } else {
-      const results = STATIONS.filter((s) => matchStation(s.name, inputVal));
-      setFilteredStations(results.slice(0, 10));
+      // 검색어 스코어링 및 정렬
+      const scored = STATIONS
+        .map((s) => ({ station: s, score: getMatchScore(s.name, inputVal) }))
+        .filter((item) => item.score > 0)
+        .sort((a, b) => b.score - a.score);
+
+      setFilteredStations(scored.slice(0, 10).map((item) => item.station));
     }
     setHighlightedIndex(0);
   }, [inputVal]);
@@ -100,13 +106,22 @@ export const StationAutocomplete: FC<StationAutocompleteProps> = ({
           autoFocus={autoFocus}
           onFocus={() => setIsOpen(true)}
           onChange={(e) => {
-            setInputVal(e.target.value);
+            const val = e.target.value;
+            setInputVal(val);
             setIsOpen(true);
-            const exact = STATIONS.find((s) => s.name === e.target.value);
+            
+            // 입력값 정규화 (예: '사당역' 입력 시 '사당' 역으로 자동 인식)
+            const clean = val.trim().replace(/역$/, '').toLowerCase();
+            const exact = STATIONS.find(
+              (s) => s.name.toLowerCase() === clean || s.name.toLowerCase() === val.trim().toLowerCase()
+            );
+
             if (exact) {
               onChange(exact.name);
-            } else if (e.target.value === '') {
+            } else if (val === '') {
               onChange('');
+            } else {
+              onChange(val);
             }
           }}
           onKeyDown={handleKeyDown}
@@ -126,8 +141,9 @@ export const StationAutocomplete: FC<StationAutocompleteProps> = ({
 
       {isOpen && filteredStations.length > 0 && (
         <div className="absolute z-50 left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-dropdown max-h-64 overflow-y-auto py-1 animate-in fade-in zoom-in-95 duration-100">
-          <div className="px-3 py-1.5 text-[11px] font-medium text-slate-400 border-b border-slate-100">
-            {inputVal ? `'${inputVal}' 검색 결과` : '주요 역 목록'}
+          <div className="px-3 py-1.5 text-[11px] font-medium text-slate-400 border-b border-slate-100 flex items-center justify-between">
+            <span>{inputVal ? `'${inputVal}' 검색 결과` : '주요 역 목록'}</span>
+            <span className="text-[10px] text-slate-400">{filteredStations.length}개</span>
           </div>
           {filteredStations.map((station, idx) => (
             <div
