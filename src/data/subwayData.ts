@@ -372,6 +372,12 @@ export const STATIONS: Station[] = [
   // 인천1호선
   { id: 'incheon_univ', name: '인천대입구', lines: ['인천1호선'], lat: 37.391703, lng: 126.640243 },
   { id: 'central_park', name: '센트럴파크', lines: ['인천1호선'], lat: 37.393043, lng: 126.633458 },
+
+  // GTX-A
+  { id: 'unjeong_jungang', name: '운정중앙', lines: ['GTX-A'], lat: 37.7126, lng: 126.7381 },
+  { id: 'kintex', name: '킨텍스', lines: ['GTX-A'], lat: 37.6644, lng: 126.7456 },
+  { id: 'seongnam_gtx', name: '성남', lines: ['GTX-A', '경강선'], lat: 37.394776, lng: 127.123287 },
+  { id: 'dongtan', name: '동탄', lines: ['GTX-A'], lat: 37.199344, lng: 127.096328 },
 ];
 
 // 역 간 연결 엣지 (인접역 및 이동 소요시간, 양방향)
@@ -798,10 +804,17 @@ export const SUBWAY_EDGES: SubwayEdge[] = [
   { from: 'sinseol_dong', to: 'bomon', line: '우이신설선', duration: 2 },
   { from: 'bomon', to: 'sungshin_univ', line: '우이신설선', duration: 2 },
 
-  // GTX-A (킨텍스-대곡-연신내-서울역-삼성-수서-판교-구성-동탄)
+  // GTX-A (운정중앙-킨텍스-대곡-연신내-서울역-수서-성남-구성-동탄)
+  { from: 'unjeong_jungang', to: 'kintex', line: 'GTX-A', duration: 4 },
+  { from: 'kintex', to: 'daegok', line: 'GTX-A', duration: 3 },
   { from: 'daegok', to: 'yeonsinnae', line: 'GTX-A', duration: 5 },
-  { from: 'suseo', to: 'pangyo', line: 'GTX-A', duration: 6 },
-  { from: 'pangyo', to: 'guseong', line: 'GTX-A', duration: 4 },
+  { from: 'yeonsinnae', to: 'seoul_station', line: 'GTX-A', duration: 4 },
+  { from: 'seoul_station', to: 'suseo', line: 'GTX-A', duration: 10 },
+  { from: 'suseo', to: 'seongnam_gtx', line: 'GTX-A', duration: 6 },
+  { from: 'seongnam_gtx', to: 'pangyo', line: 'GTX-A', duration: 2 },
+  { from: 'seongnam_gtx', to: 'imae', line: 'GTX-A', duration: 2 },
+  { from: 'seongnam_gtx', to: 'guseong', line: 'GTX-A', duration: 5 },
+  { from: 'guseong', to: 'dongtan', line: 'GTX-A', duration: 7 },
 
   // 인천1호선
   { from: 'bupyeong_office', to: 'bupyeong', line: '인천1호선', duration: 4 },
