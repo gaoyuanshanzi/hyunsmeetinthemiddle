@@ -174,9 +174,7 @@ export function App() {
             setSelectedResultIndex={setSelectedResultIndex}
             isCalculating={isCalculating}
             errorMessage={errorMessage}
-            mobileViewMode={
-              mobileTab === 'input' ? 'input' : mobileTab === 'result' ? 'result' : 'all'
-            }
+            mobileTab={mobileTab}
             onNavigateToMap={() => setMobileTab('map')}
           />
         </div>
